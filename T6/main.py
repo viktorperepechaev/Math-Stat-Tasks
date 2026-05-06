@@ -47,19 +47,25 @@ def better_choice(
 
 
 def histograms_comparison(
-    theta: float, sample_median: np.ndarray, sample_mean: np.ndarray, launch: int
+    theta: float,
+    sample_median: np.ndarray,
+    sample_mean: np.ndarray,
+    launch: int,
+    prediction_number: int,
 ) -> None:
     canvas: go.Figure = make_subplots(
-        rows=1,
-        cols=2,
-        subplot_titles=(f"Выборочные медианы", f"Выборочные средние")
+        rows=1, cols=2, subplot_titles=(f"Выборочные медианы", f"Выборочные средние")
     )
 
     width: float = (float(np.max(sample_median)) - float(np.min(sample_median))) / 10
 
     """Fifth point"""
     canvas.add_trace(
-        go.Histogram(name="Выборочные медианы", x=sample_median, xbins=dict(size=width)), row=1, col=1
+        go.Histogram(
+            name="Выборочные медианы", x=sample_median, xbins=dict(size=width)
+        ),
+        row=1,
+        col=1,
     )
     canvas.add_vline(
         x=theta, line_dash="dash", line_color="red", annotation_text="θ", row=1, col=1
@@ -67,17 +73,19 @@ def histograms_comparison(
 
     """Sixth point"""
     canvas.add_trace(
-        go.Histogram(name="Выборочные средние", x=sample_mean, xbins=dict(size=width)), row=1, col=2
+        go.Histogram(name="Выборочные средние", x=sample_mean, xbins=dict(size=width)),
+        row=1,
+        col=2,
     )
     canvas.add_vline(
         x=theta, line_dash="dash", line_color="red", annotation_text="θ", row=1, col=2
     )
 
     canvas.update_layout(
-        title_text=f"Сравнение оценок. Запуск №: {launch}. θ: {theta}"
+        title_text=f"Сравнение оценок. Запуск №: {launch}.{prediction_number} θ: {theta}"
     )
 
-    canvas.write_html(f"Запуск №: {launch}.html")
+    canvas.write_html(f"Запуск №: {launch}_{prediction_number}.html")
 
 
 if __name__ == "__main__":
@@ -95,7 +103,16 @@ if __name__ == "__main__":
             distribution=cauchy, loc_distribution=theta, scale_distribution=1
         )
 
-        histograms_comparison(theta, sample_median, sample_mean, i + 1)
+        histograms_comparison(theta, sample_median, sample_mean, i + 1, 1)
+
+        """Eleventh point"""
+        histograms_comparison(
+            0.0,
+            np.sqrt(number_of_numbers_in_sample) * (sample_median - theta),
+            np.sqrt(number_of_numbers_in_sample) * (sample_mean - theta),
+            i + 1,
+            2,
+        )
 
     with open("log.txt", "a", encoding="utf-16") as f:
         print("--------------------", file=f)
